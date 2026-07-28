@@ -33,8 +33,27 @@ func New(client *goredis.Client) lock.Locker {
 	return &redisLocker{rs: redsync.New(pool), expiry: defaultExpiry}
 }
 
-func (l *redisLocker) Acquire(ctx context.Context, key string) (lock.Handle, error) {
-	mu := l.rs.NewMutex(key, redsync.WithTries(1), redsync.WithExpiry(l.expiry))
+// Acquire honours the neutral AcquireOption set: Tries/RetryDelay make redsync
+// block and retry on contention (default: a single, non-blocking attempt), and
+// Expiry overrides the mutex TTL (default: defaultExpiry). redsync natively
+// implements the retry-until-acquired loop.
+func (l *redisLocker) Acquire(ctx context.Context, key string, opts ...lock.AcquireOption) (lock.Handle, error) {
+	cfg := lock.ResolveAcquireConfig(opts...)
+
+	tries := cfg.Tries
+	if tries < 1 {
+		tries = 1
+	}
+	expiry := cfg.Expiry
+	if expiry <= 0 {
+		expiry = l.expiry
+	}
+	muOpts := []redsync.Option{redsync.WithTries(tries), redsync.WithExpiry(expiry)}
+	if cfg.RetryDelay > 0 {
+		muOpts = append(muOpts, redsync.WithRetryDelay(cfg.RetryDelay))
+	}
+
+	mu := l.rs.NewMutex(key, muOpts...)
 	if err := mu.LockContext(ctx); err != nil {
 		// Contention (quorum already taken) → not acquired; anything else is a
 		// backend failure surfaced to the caller.
@@ -62,6 +81,23 @@ func (h *redisHandle) Release(ctx context.Context) error {
 	}
 	if !ok {
 		return fmt.Errorf("redis lock release %q: not held", h.mu.Name())
+	}
+	return nil
+}
+
+// Extend renews the mutex TTL. Unlike Release, a lapsed lock here is not benign:
+// the critical section believed it still held the lock, so a failed extension is
+// surfaced as lock.ErrLockLost.
+func (h *redisHandle) Extend(ctx context.Context) error {
+	ok, err := h.mu.ExtendContext(ctx)
+	if err != nil {
+		if errors.Is(err, redsync.ErrLockAlreadyExpired) {
+			return fmt.Errorf("redis lock extend %q: %w", h.mu.Name(), lock.ErrLockLost)
+		}
+		return fmt.Errorf("redis lock extend %q: %w", h.mu.Name(), err)
+	}
+	if !ok {
+		return fmt.Errorf("redis lock extend %q: %w", h.mu.Name(), lock.ErrLockLost)
 	}
 	return nil
 }

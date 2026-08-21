@@ -40,10 +40,7 @@ func New(client *goredis.Client) lock.Locker {
 func (l *redisLocker) Acquire(ctx context.Context, key string, opts ...lock.AcquireOption) (lock.Handle, error) {
 	cfg := lock.ResolveAcquireConfig(opts...)
 
-	tries := cfg.Tries
-	if tries < 1 {
-		tries = 1
-	}
+	tries := max(cfg.Tries, 1)
 	expiry := cfg.Expiry
 	if expiry <= 0 {
 		expiry = l.expiry

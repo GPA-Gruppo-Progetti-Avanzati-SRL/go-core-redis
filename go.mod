@@ -3,7 +3,7 @@ module github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-redis
 go 1.27
 
 require (
-	github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app v0.0.29-0.20260827154351-3ac7b7879800
+	github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app v0.0.29-0.20260828102824-bd9bf5d01eb8
 	github.com/go-redsync/redsync/v4 v4.13.0
 	github.com/redis/go-redis/v9 v9.20.0
 	github.com/rs/zerolog v1.35.1

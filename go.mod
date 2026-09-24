@@ -4,8 +4,8 @@ go 1.27.1
 
 require (
 	github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app v0.0.29-0.20260916103925-732c51fed2f5
-	github.com/go-redsync/redsync/v4 v4.13.0
-	github.com/redis/go-redis/v9 v9.20.0
+	github.com/go-redsync/redsync/v4 v4.18.0
+	github.com/redis/go-redis/v9 v9.22.0
 	github.com/rs/zerolog v1.35.1
 	go.uber.org/fx v1.24.0
 )
@@ -27,8 +27,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ipfans/fxlogger v0.2.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.0 // indirect

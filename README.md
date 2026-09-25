@@ -60,64 +60,16 @@ config:
 
 ---
 
-## Lock distribuito — `locker`
+## Lock distribuito
 
-Implementa `lock.Locker` di go-core-app su redsync (Redlock). Non conosce gocron né lo scheduler:
-è `go-core-batch` ad adattare un `lock.Locker` a gocron, internamente.
-
-```go
-import (
-    "github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-redis/redis"
-    redislocker "github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-redis/locker"
-)
-
-redis.Module(&svc.Redis, engine.Scheduler, engine.Batch)   // prima il client
-
-batch.Module(&svc.Batch, Register,
-    batch.WithStore(storemongo.Module),
-    batch.WithLocker(redislocker.Module),                  // poi il locker
-    // ...
-)
-```
-
-`locker.Module(modes ...string)` è **modes-only**: non ha config, consuma il `*goredis.Client`
-fornito da `redis.Module`, che va quindi wirato prima. Registra `lock.Locker` con
-`core.ProvideAs`.
-
-### Uso diretto
+Non è più qui: il backend Redis del lock è **`go-core-locker/redisstore`**, che consuma il
+`*goredis.Client` fornito da `redis.Module`. Con lui è uscita anche la dipendenza `redsync`: con un
+solo client non eseguiva Redlock ma un `SET NX`.
 
 ```go
-h, err := locker.Acquire(ctx, "import-anagrafiche")
-if errors.Is(err, lock.ErrNotAcquired) {
-    return nil          // qualcun altro sta già lavorando: si salta il giro
-}
-if err != nil {
-    return err
-}
-defer h.Release(ctx)
+redis.Module(&cfg.Redis, engine.Scheduler)
+corelock.Module(&cfg.Lock, corelock.WithBackend(redisstore.Module))
 ```
-
-Senza opzioni `Acquire` fa **un solo tentativo non bloccante** con TTL di **30s** e ritorna
-`lock.ErrNotAcquired` in contesa: è la semantica dispatch-dedup su cui si appoggia lo scheduler
-batch. Per una sezione critica che richiede mutua esclusione:
-
-```go
-h, err := locker.Acquire(ctx, "chiave",
-    lock.WithWait(2*time.Minute, 200*time.Millisecond),   // blocca e ritenta
-    lock.WithExpiry(5*time.Minute))
-```
-
-`Handle.Extend(ctx)` rinnova il TTL di una sezione critica lunga, e ritorna `lock.ErrLockLost` se
-il lock è nel frattempo scaduto ed è stato rubato — a differenza di `Release`, dove un lock già
-scaduto è benigno per un lock di dedup.
-
-> **Il lock dello scheduler batch è un'ottimizzazione, non correttezza.** La correttezza del batch
-> è garantita dal DB claiming (`store.ClaimBatch`); il lock evita solo che N repliche eseguano lo
-> stesso tick cron. Un'app mongo-only o sql-only può usare
-> [`go-core-mongo/locker`](../go-core-mongo) o [`go-core-sql/locker`](../go-core-sql) e **non
-> deployare Redis**.
-
----
 
 ## Comandi
 

@@ -4,7 +4,6 @@ go 1.27.1
 
 require (
 	github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app v0.0.29-0.20260916103925-732c51fed2f5
-	github.com/go-redsync/redsync/v4 v4.18.0
 	github.com/redis/go-redis/v9 v9.22.0
 	github.com/rs/zerolog v1.35.1
 	go.uber.org/fx v1.24.0

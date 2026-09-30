@@ -1,6 +1,6 @@
 # Codici di errore — go-core-redis
 
-**Il modulo non emette nessun `*core.ApplicationError`**, quindi non ha codici né `Ambit`:
+**Il modulo non emette nessun `*core.Error`**, quindi non ha codici né `Ambit`:
 `redis.NewService` ritorna il `*goredis.Client` e gli errori risalgono così come li produce il
 client (incluso `redis.Nil` per una chiave assente). Chi li espone via HTTP li avvolge nel
 proprio `core.TechnicalError().WithCause(err)`, ottenendo `TECH500` con l'ambit dell'app.

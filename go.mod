@@ -3,7 +3,7 @@ module github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-redis
 go 1.27.1
 
 require (
-	github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app v0.0.29-0.20260930105232-67b4143d76d8
+	github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app v0.0.29-0.20260930140542-5b06937a5101
 	github.com/redis/go-redis/v9 v9.22.0
 	github.com/rs/zerolog v1.35.1
 	go.uber.org/fx v1.24.0

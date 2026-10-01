@@ -4,6 +4,7 @@ go 1.27.1
 
 require (
 	github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app v0.0.29-0.20260930155225-6ce10256d1c2
+	github.com/alicebob/miniredis/v2 v2.39.0
 	github.com/redis/go-redis/v9 v9.22.0
 	github.com/rs/zerolog v1.35.1
 	go.uber.org/fx v1.24.0
@@ -47,6 +48,7 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/bridges/prometheus v0.71.0 // indirect
 	go.opentelemetry.io/contrib/exporters/autoexport v0.71.0 // indirect

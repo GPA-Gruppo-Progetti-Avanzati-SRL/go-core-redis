@@ -49,7 +49,6 @@ type data struct {
 config:
   services:
     redis:
-      enable: true
       address: redis-master
       port: 6379
       password: ${REDIS_PWD}
@@ -57,6 +56,11 @@ config:
 
 `redis.Module` usa `core.Module("redis", ...)`: il `*Config` è **privato** al modulo, il
 `*goredis.Client` è esportato al grafo dell'app.
+
+All'avvio il client fa un **`Ping`**: un Redis irraggiungibile o una password sbagliata fermano l'app,
+come per mongo e sql, invece di emergere alla prima operazione. Non c'è un campo `enable`: c'era e
+nessuno lo leggeva (`enable: false` non spegneva nulla) — l'attivazione la decidono i modes di
+`redis.Module`. Nello YAML la chiave `enable` è ora ignorata; in Go, chi la valorizzava non compila.
 
 ---
 

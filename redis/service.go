@@ -21,6 +21,14 @@ func NewService(config *Config, lc fx.Lifecycle) *goredis.Client {
 	redisClient := goredis.NewClient(redisOptions)
 
 	lc.Append(fx.Hook{
+		// Il Ping all'avvio è il fail-fast degli altri driver (mongo, sql): un Redis irraggiungibile
+		// o una password sbagliata fermano l'avvio, invece di emergere alla prima operazione.
+		OnStart: func(ctx context.Context) error {
+			if err := redisClient.Ping(ctx).Err(); err != nil {
+				return fmt.Errorf("redis %s: %w", redisOptions.Addr, err)
+			}
+			return nil
+		},
 		OnStop: func(ctx context.Context) error {
 			if redisClient != nil {
 				log.Info().Msg("Disconnecting redis")
